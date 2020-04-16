@@ -1,2 +1,0 @@
-python 3.6.5
-pygame 1.9.6
