@@ -304,7 +304,7 @@ def game():
                 cactus.speed += 0.25
                 ground.speed += 0.25
 
-            if score_value == 100.0: # ptera is allowed to spawn after score crosses 500
+            if score_value == 500.0: # ptera is allowed to spawn after score crosses 500
                 ptera.allowed = True
 
             if score_value > 1 and score_value % 100 == 0: # Checkpoint sound after score crosses a multiple of 100
