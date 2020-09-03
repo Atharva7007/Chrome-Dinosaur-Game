@@ -1,6 +1,7 @@
 import random
 import pygame
 from pygame.locals import *
+import time
 
 pygame.init()
 
@@ -26,7 +27,7 @@ class Dino():
         self.duck2 = pygame.image.load("sprites/dino_ducking2.png")
         self.duck1 = pygame.transform.scale(self.duck1, (self.WIDTH + 15, self.HEIGHT))
         self.duck2 = pygame.transform.scale(self.duck2, (self.WIDTH + 15, self.HEIGHT))
-        self.ducking = False
+        self.is_ducking = False
 
         self.duckImgs = [self.duck1, self.duck2]
 
@@ -46,7 +47,7 @@ class Dino():
         if self.y < 170: # check if jumping
             self.up = self.up + self.g * self.t # v = u + at
             self.y -= self.up
-            self.t += 0.15 #  incrementing time
+            self.t += 0.12 #  incrementing time
 
         if self.y > 170: # check if the jump is complete and resetting all variables
             self.y = 170
@@ -54,7 +55,7 @@ class Dino():
             self.up = 7
             self.jumping = False
 
-        if self.ducking:
+        if self.is_ducking:
             self.hitbox = pygame.Rect(self.x + 5, self.y + 20, self.WIDTH + 12, self.HEIGHT - 20)
             self.image = self.duckImgs[int(self.count) % 2]
             self.count += 0.2
@@ -62,45 +63,40 @@ class Dino():
             self.hitbox = pygame.Rect(self.x + 5, self.y, self.WIDTH - 15, self.HEIGHT - 5)
             self.image = self.Img
         else:
-            self.hitbox = pygame.Rect(self.x + 5, self.y, self.WIDTH - 15, self.HEIGHT - 5)
+            self.hitbox = pygame.Rect(self.x + 5, self.y, self.WIDTH - 17, self.HEIGHT - 5)
             self.image = self.runImgs[int(self.count) % 2]
-            self.count += 0.2
+            self.count += 0.15
 
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
-        #pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 2) In case you want to see the hitbox
+        #pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 2) #In case you want to see the hitbox
 
 class Ptera():
     def __init__(self):
-        self.WIDTH, self.HEIGHT = 50, 40
+        self.width, self.height = 50, 40
         self.im1 = pygame.image.load("sprites/ptera1.png")
         self.im2 = pygame.image.load("sprites/ptera2.png")
 
-        self.im1 = pygame.transform.scale(self.im1, (self.WIDTH, self.HEIGHT))
-        self.im2 = pygame.transform.scale(self.im2, (self.WIDTH, self.HEIGHT))
+        self.im1 = pygame.transform.scale(self.im1, (self.width, self.height))
+        self.im2 = pygame.transform.scale(self.im2, (self.width, self.height))
 
         self.flaps = [self.im1, self.im2]
 
-        self.image = None
-        self.allowed = False
+        self.image = self.im1
 
-        self.x = 20000
-        self.y = 175
         self.altitudes = [175, 150, 110]
+        self.x = random.randint(750, 1000) # generate a random position for ptera
+        self.y = random.choice(self.altitudes)
+        
         self.speed = 5
         self.count = 0
+        self.is_ptera = True
+        self.is_cactus = False
 
-        self.hitbox = (self.x, self.y + 10, self.WIDTH, self.HEIGHT - 12)
-
-    def create(self):
-        self.x = random.randint(100, 200) * 10 # generate a random position for ptera
-        self.y = random.choice(self.altitudes)
+        self.hitbox = (self.x, self.y + 10, self.width, self.height - 12)
+        
 
     def update(self):
-        if self.allowed:
-            self.create()
-            self.allowed = False
-
         self.image = self.flaps[int(self.count) % 2] # Flapping mechanism
         self.count += 0.1
 
@@ -109,11 +105,11 @@ class Ptera():
         if self.x < 50:
             self.allowed = True
 
-        self.hitbox = pygame.Rect(self.x, self.y + 10, self.WIDTH, self.HEIGHT - 12)
+        self.hitbox = pygame.Rect(self.x, self.y + 10, self.width, self.height - 12)
 
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
-        #pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 2) In case you want to see the hitbox
+        #pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 2) #In case you want to see the hitbox
 
 class Cactus():
     def __init__(self):
@@ -121,45 +117,27 @@ class Cactus():
         self.image1 = pygame.image.load("sprites/cacti-big.png")
         self.width0 = 45
         self.height = 44
-        self.width1 = 50
+        self.width1 = 65
         self.image0 = pygame.transform.scale(self.image0, (self.width0, self.height))
         self.image1 = pygame.transform.scale(self.image1, (self.width1, self.height))
-        self.cacti_dist = 450
-        self.x0 = 1350
+        self.is_cactus = True
+        self.is_ptera = False
+
+        self.image, self.width = random.choice([[self.image0, self.width0], [self.image1, self.width1]])
+
+        self.x = random.randint(720, 1000)
         self.y = 175
-        self.x1 = self.x0 + self.cacti_dist
-        self.x2 = self.x1 + self.cacti_dist - 100
         self.speed = 4
 
-        self.hitbox0 = pygame.Rect(self.x0, self.y, self.width0, self.height)
-        self.hitbox1 = pygame.Rect(self.x1, self.y, self.width1, self.height)
-        self.hitbox2 = pygame.Rect(self.x2, self.y, self.width0, self.height)
-        self.hitboxes = [self.hitbox0, self.hitbox1, self.hitbox2]
+        self.hitbox = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def update(self):
-        self.x0 -= self.speed
-        self.x1 -= self.speed
-        self.x2 -= self.speed
+        self.x -= self.speed
 
-        self.hitbox0 = pygame.Rect(self.x0, self.y, self.width0, self.height)
-        self.hitbox1 = pygame.Rect(self.x1, self.y, self.width1, self.height)
-        self.hitbox2 = pygame.Rect(self.x2, self.y, self.width0, self.height)
-        self.hitboxes = [self.hitbox0, self.hitbox1, self.hitbox2]
-
-        if self.x0 < -30:
-            #self.x0 = 1500
-            self.x0 = 1400
-        elif self.x1 < -30:
-            #self.x1 = 1500
-            self.x1 = self.x0 + random.randint(300, 700)
-        elif self.x2 < -30:
-            #self.x2 = 1500
-            self.x2 = self.x1 + random.randint(300, 700)
+        self.hitbox = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def draw(self, screen):
-        screen.blit(self.image0, (self.x0, self.y))
-        screen.blit(self.image1, (self.x1, self.y))
-        screen.blit(self.image0, (self.x2, self.y))
+        screen.blit(self.image, (self.x, self.y))
 
 class Ground():
     def __init__(self):
@@ -208,14 +186,14 @@ class Cloud():
 
 
 def game():
-    screen = pygame.display.set_mode((800, 230))
+    screen = pygame.display.set_mode((700, 250))
     clock = pygame.time.Clock()
     font = pygame.font.Font("freesansbold.ttf", 20)
     check_point = pygame.mixer.Sound("checkPoint.wav")
     death_sound = pygame.mixer.Sound("die.wav")
     pygame.display.set_caption("Dino Run")
+    
     dino_icon = pygame.image.load("sprites/dino.png")
-
     pygame.display.set_icon(dino_icon)
 
     game_over = pygame.image.load("sprites/game_over.png")
@@ -226,15 +204,16 @@ def game():
 
     ground = Ground()
     dino = Dino()
-    cactus = Cactus()
     cloud = Cloud()
-    ptera = Ptera()
+    obstacles = [Cactus()]
+    obstacle_start = time.time()
+    minimum_time = 1.5
 
     running = False
     play_game = True
     dead = False
     high_score_value = 0
-    FPS = 60
+    FPS = 85
 
     while play_game:
         if not dead:
@@ -254,8 +233,8 @@ def game():
                     running = True
                     ground = Ground()
                     dino = Dino()
-                    cactus = Cactus()
-                    ptera = Ptera()
+                    obstacles = [Cactus()]
+                    obstacle_start = time.time()
                     dead = False
                     running = True
                     score_value = 0
@@ -270,6 +249,7 @@ def game():
             high_score = font.render("High Score: " + str(int(high_score_value)), True, (200, 200, 200))
             screen.fill(GREY)
 
+            # Event handling
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -277,10 +257,10 @@ def game():
                     if event.key == pygame.K_SPACE:
                         dino.jump()
                     elif event.key == pygame.K_DOWN:
-                        dino.ducking = True
+                        dino.is_ducking = True
                 elif event.type == pygame.KEYUP:
                     if event.key == pygame.K_DOWN:
-                        dino.ducking = False
+                        dino.is_ducking = False
 
             ground.update()
             ground.draw(screen)
@@ -291,47 +271,62 @@ def game():
             dino.update()
             dino.draw(screen)
 
-            cactus.update()
-            cactus.draw(screen)
+            for obstacle in obstacles:
+                if obstacle.is_cactus:
+                    obstacle.speed = ground.speed
+                elif obstacle.is_ptera:
+                    obstacle.speed = ground.speed + 1
+                obstacle.update()
+                obstacle.draw(screen)
 
-            ptera.update()
-            ptera.draw(screen)
+            screen.blit(score, (550, 30))
+            screen.blit(high_score, (350, 30))
 
-            screen.blit(score, (650, 30))
-            screen.blit(high_score, (450, 30))
+            # Add new obstacle
+            if time.time() - obstacle_start > minimum_time + random.randrange(0, 30) / 10:
+                obstacle_start = time.time()
+                if score_value > 500.0:
+                    ptera_probability = random.random() # Generate a random float from 0 to 1.0
+                    if ptera_probability < 0.2: # 20% probability that ptera is spawned
+                        obstacles.append(Ptera())
+                        obstacles[-1].speed = ground.speed + 1
+                    else:
+                        obstacles.append(Cactus()) # 80% probability of a cactus (duh)
+                        obstacles[-1].speed = ground.speed # Synchronise the speed
+                else:
+                    obstacles.append(Cactus())
+                    obstacles[-1].speed = ground.speed
 
-            if int(score_value) % 100 == 0 and int(score_value) % 3 == 0: # Increase game speed after score crosses a multiple of 300
-                cactus.speed += 0.25
+            if int(score_value) > 0 and int(score_value) % 100 == 0 and int(score_value) % 3 == 0: # Increase game speed after score crosses a multiple of 300
                 ground.speed += 0.25
-
-            if score_value == 500.0: # ptera is allowed to spawn after score crosses 500
-                ptera.allowed = True
+                for obstacle in obstacles:
+                    if obstacle.is_cactus:
+                        obstacle.speed = ground.speed
+                    elif obstacle.is_ptera:
+                        obstacle.speed = ground.speed + 1
 
             if score_value > 1 and score_value % 100 == 0: # Checkpoint sound after score crosses a multiple of 100
                 check_point.play()
 
-            closest_hitbox = min(cactus.hitbox0, cactus.hitbox1, cactus.hitbox2) # Hitbox of closest cactus
-
-            if dino.hitbox.colliderect(closest_hitbox): # Collision detection with closest cactus
+            if dino.hitbox.colliderect(obstacles[0].hitbox): # Collision detection with closest cactus
                 death_sound.play()
                 dead = True
-                screen.blit(game_over, (200, 70))
-                screen.blit(replay_button, (360, 100))
+                screen.blit(game_over, (170, 70))
+                screen.blit(replay_button, (340, 100))
 
-            if dino.hitbox.colliderect(ptera.hitbox): # Collision detection with ptera
-                death_sound.play()
-                dead = True
-                screen.blit(game_over, (200, 70))
-                screen.blit(replay_button, (360, 100))
-
+            #print(obstacles)
+            if obstacles[0].x < -30:
+                obstacles.pop(0)
+                if obstacles == []:
+                    obstacles.append(Cactus())
+                    obstacle_start = time.time()
 
             pygame.display.update()
 
             if dead:
                 del dino
                 del ground
-                del cactus
-                del ptera
+                del obstacles
                 running = False
 
 game()
